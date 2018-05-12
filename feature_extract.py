@@ -12,7 +12,7 @@ def main():
     feature_extract("train", "test")
 
 def feature_extract(train_path, test_path):
-    NUM_FEATURES = 500
+    NUM_FEATURES = 1000
     print("Loading preprocessed data")
     vectorizer = sklearn.feature_extraction.text.TfidfVectorizer()
     corpus = util.preprocessed(train_path)
@@ -43,10 +43,11 @@ def feature_extract(train_path, test_path):
     
     names = vectorizer.get_feature_names()
     feature_vector = np.array([[] for _ in range(len(labels))])
-    del labels
     pickle.dump(clf, open("model", "wb"))
     pickle.dump(feature_names, open(".features", "wb"))
     pickle.dump(vectorizer, open("vectorizer", "wb"))
+
+    """
     mat = X.toarray()
     del X
     used_indices = []
@@ -68,6 +69,7 @@ def feature_extract(train_path, test_path):
     tf_matrix = sklearn.preprocessing.normalize(tf_matrix, norm='l1', axis=1)
     pickle.dump(tf_matrix, open("tfm.csr_matrix", "wb"))
     pickle.dump(used_indices, open(".indices", "wb"))
+    """
 
 if __name__ == "__main__":
     main()
