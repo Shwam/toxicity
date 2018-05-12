@@ -12,6 +12,7 @@ def main():
     feature_extract("train", "test")
 
 def feature_extract(train_path, test_path):
+    NUM_FEATURES = 500
     print("Loading preprocessed data")
     vectorizer = sklearn.feature_extraction.text.TfidfVectorizer()
     corpus = util.preprocessed(train_path)
@@ -36,13 +37,18 @@ def feature_extract(train_path, test_path):
 
     # Select 100 most relevant features 
     names.sort(key=lambda name: -0.2*frequencies[name] +  -0.8*importances[name])
-    for i in range(100):
+    for i in range(NUM_FEATURES):
         print(names[i], importances[names[i]], frequencies[names[i]])
-    feature_names = names[:100]
+    feature_names = names[:NUM_FEATURES]
     
     names = vectorizer.get_feature_names()
-    mat = X.toarray()
     feature_vector = np.array([[] for _ in range(len(labels))])
+    del labels
+    pickle.dump(clf, open("model", "wb"))
+    pickle.dump(feature_names, open(".features", "wb"))
+    pickle.dump(vectorizer, open("vectorizer", "wb"))
+    mat = X.toarray()
+    del X
     used_indices = []
     name_indices = [names.index(name) for name in feature_names]
 
@@ -51,19 +57,17 @@ def feature_extract(train_path, test_path):
     import time
     for i in range(len(mat)):
         sample = []
-        for j in range(100):
+        for j in range(NUM_FEATURES):
             sample.append(mat[i][name_indices[j]])
         if sum(1 for k in sample if k > 0) < 10:
             continue
         used_indices.append(i)
         feature_vector = np.append(feature_vector, sample)
-    feature_vector.shape = (len(used_indices), 100)
-    tf_matrix = scipy.sparse.csr_matrix(feature_vector, shape=(len(used_indices), 100))
+    feature_vector.shape = (len(used_indices), NUM_FEATURES)
+    tf_matrix = scipy.sparse.csr_matrix(feature_vector, shape=(len(used_indices), NUM_FEATURES))
     tf_matrix = sklearn.preprocessing.normalize(tf_matrix, norm='l1', axis=1)
     pickle.dump(tf_matrix, open("tfm.csr_matrix", "wb"))
-    pickle.dump(feature_names, open(".features", "wb"))
     pickle.dump(used_indices, open(".indices", "wb"))
 
 if __name__ == "__main__":
     main()
-

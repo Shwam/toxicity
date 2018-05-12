@@ -14,4 +14,4 @@ def preprocessed(fname):
 def labels(fname):
     if fname[-4:].lower() != ".csv":
         fname = "dataset/" + fname + ".csv"
-    return [m[1] for m in load_metadata(fname)]
+    return [m[2] for m in load_metadata(fname)]
